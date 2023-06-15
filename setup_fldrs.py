@@ -1,3 +1,6 @@
+# Creates folders to store images
+# Author: Jade Kessinger
+# Created with the help of ChatGPT and following Prof. Wloka's Asymmetric Search stimuli generation
 import os
 
 # Create the dot_arrays folder if it doesn't exist

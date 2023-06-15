@@ -1,3 +1,6 @@
+# A set of functions to create stimulus images for dot search arrays
+# Author: Jade Kessinger
+# Created with the help of ChatGPT and following Prof. Wloka's Asymmetric Search stimuli generation
 import os
 import random
 from colormath.color_objects import LabColor, sRGBColor
