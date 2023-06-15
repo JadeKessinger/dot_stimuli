@@ -37,8 +37,8 @@ def new_color(lab_color, degrees):
 
 
 # Set parameters
-# TODO Width = 1024, Height = 768
-image_size = 500
+image_width = 1024
+image_height = 768
 batch_size = 20
 background_color = lab_to_rgb((50, 0, 0))
 dot_radius_4 = 60
@@ -47,6 +47,7 @@ dot_radius_16 = 60
 color_diff = 60 # in degrees
 jitter_offset_4 = 5
 jitter_offset_9 = 5
+jitter_offset_16 = 5
 
 # Create the dot_arrays folder if it doesn't exist
 os.makedirs("dot_arrays", exist_ok=True)
@@ -62,18 +63,18 @@ os.makedirs(dmaps_folder, exist_ok=True)
 # Generate images with 4 dots, 9 dots, and 16 dots
 for i in range(batch_size):
     # Create a new image with the given size and background color
-    image_4 = Image.new("RGB", (image_size, image_size), background_color)
+    image_4 = Image.new("RGB", (image_width, image_height), background_color)
     draw_4 = ImageDraw.Draw(image_4)
 
-    image_9 = Image.new("RGB", (image_size, image_size), background_color)
+    image_9 = Image.new("RGB", (image_width, image_height), background_color)
     draw_9 = ImageDraw.Draw(image_9)
 
-    image_16 = Image.new("RGB", (image_size, image_size), background_color)
+    image_16 = Image.new("RGB", (image_width, image_height), background_color)
     draw_16 = ImageDraw.Draw(image_16)
 
     # Draw dots for 4 dots
-    center_x_4 = image_size // 2
-    center_y_4 = image_size // 2
+    center_x_4 = image_width // 2
+    center_y_4 = image_height // 2
 
     dot_color_4_lab = (
         50,
@@ -84,7 +85,7 @@ for i in range(batch_size):
     dot_color_4 = lab_to_rgb(dot_color_4_lab)
     special_dot_color_4 = lab_to_rgb(special_dot_color_4_lab)
     special_dot_index_4 = random.randint(0, 3)
-    distance_4 = (image_size - 2 * dot_radius_4) // 4
+    distance_4 = (image_height - 2 * dot_radius_4) // 4
     dot_coordinates_4 = [
         (
             center_x_4
@@ -133,8 +134,8 @@ for i in range(batch_size):
         )
 
     # Draw dots for 9 dots
-    center_x_9 = image_size // 2
-    center_y_9 = image_size // 2
+    center_x_9 = image_width // 2
+    center_y_9 = image_height // 2
     dot_color_9_lab = (
         50,
         random.randint(-128, 128),
@@ -144,7 +145,7 @@ for i in range(batch_size):
     dot_color_9 = lab_to_rgb(dot_color_9_lab)
     special_dot_color_9 = lab_to_rgb(special_dot_color_9_lab)
     special_dot_index_9 = random.randint(0, 8)
-    distance_9 = (image_size - 2 * dot_radius_9) // 2.5
+    distance_9 = (image_height - 2 * dot_radius_9) // 2.5
     dot_coordinates_9 = [
         (
             center_x_9 - distance_9 + random.randint(-jitter_offset_9, jitter_offset_9),
@@ -197,21 +198,18 @@ for i in range(batch_size):
         )
 
     # Draw dots for 16 dots
-    center_x_16 = image_size // 2
-    center_y_16 = image_size // 2
-    dot_color_16 = (
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
+    center_x_16 = image_width // 2
+    center_y_16 = image_height // 2
+    dot_color_16_lab = (
+        50,
+        random.randint(-128, 128),
+        random.randint(-128, 128),
     )
-    special_dot_color_16 = (
-        min(dot_color_16[0] + random.randint(-50, 50), 255),
-        min(dot_color_16[1] + random.randint(-50, 50), 255),
-        min(dot_color_16[2] + random.randint(-50, 50), 255),
-    )
+    special_dot_color_16_lab = new_color(dot_color_16_lab, color_diff)
+    dot_color_16 = lab_to_rgb(dot_color_16_lab)
+    special_dot_color_16 = lab_to_rgb(special_dot_color_16_lab)
     special_dot_index_16 = random.randint(0, 15)
-    distance_16 = (image_size - dot_radius_16) // 5
-    jitter_offset_16 = dot_radius_16 // 4
+    distance_16 = (image_height - dot_radius_16) // 4
     dot_coordinates_16 = []
     for row in range(4):
         for col in range(4):
@@ -252,13 +250,13 @@ for i in range(batch_size):
     image_16.save(stimuli_image_path_16)
 
     # Create a new image with a black background for tmaps
-    black_image_tmaps_4 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_tmaps_4 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_tmaps_4 = ImageDraw.Draw(black_image_tmaps_4)
 
-    black_image_tmaps_9 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_tmaps_9 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_tmaps_9 = ImageDraw.Draw(black_image_tmaps_9)
 
-    black_image_tmaps_16 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_tmaps_16 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_tmaps_16 = ImageDraw.Draw(black_image_tmaps_16)
 
     # Draw a white dot on the black background for tmaps at the same position as the special dot for 4 dots
@@ -310,13 +308,13 @@ for i in range(batch_size):
     black_image_tmaps_16.save(tmaps_image_path_16)
 
     # Create a new image with a black background for dmaps
-    black_image_dmaps_4 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_dmaps_4 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_dmaps_4 = ImageDraw.Draw(black_image_dmaps_4)
 
-    black_image_dmaps_9 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_dmaps_9 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_dmaps_9 = ImageDraw.Draw(black_image_dmaps_9)
 
-    black_image_dmaps_16 = Image.new("RGB", (image_size, image_size), (0, 0, 0))
+    black_image_dmaps_16 = Image.new("RGB", (image_width, image_height), (0, 0, 0))
     black_draw_dmaps_16 = ImageDraw.Draw(black_image_dmaps_16)
 
     # Draw white dots on the black background for dmaps at the same position as the dots for 4 dots
