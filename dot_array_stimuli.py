@@ -1,14 +1,52 @@
 import os
 import random
 from PIL import Image, ImageDraw
+from colormath.color_objects import LabColor, sRGBColor
+from colormath.color_conversions import convert_color
+from math import sqrt, atan, radians, sin, cos, pi
+
+# Loses a little precision when converting to ints
+# TODO see if we can set is_upscaled to true for sRGBColor
+def lab_to_rgb(lab):
+    # Create LabColor object
+    lab_color = LabColor(lab[0], lab[1], lab[2])
+
+    # Convert Lab to sRGB
+    rgb_color = convert_color(lab_color, sRGBColor)
+
+    # Return RGB values
+    return (int(rgb_color.rgb_r * 255), int(rgb_color.rgb_g * 255), int(rgb_color.rgb_b * 255))
+
+# Calculates the new color isoluminant in CIELAB color space with based on some degree difference
+def new_color(lab_color, degrees):
+    # Calculate radius of circle
+    radius = sqrt(lab_color[1]**2 + lab_color[2]**2)
+
+    # Calculate new angle
+    if lab_color[1] == 0:
+        angle = radians(degrees)
+    else:
+        angle = (atan(float(lab_color[2]) / lab_color[1]) + radians(degrees)) % (2*pi)
+
+    # Calculate new point
+    a =  radius * cos(angle)
+    b = radius * sin(angle)
+
+    # Return CIELAB color
+    return (lab_color[0], a, b)
+
 
 # Set parameters
+# TODO Width = 1024, Height = 768
 image_size = 500
 batch_size = 20
-background_color = (60, 60, 60)
-dot_radius_4 = 30
-dot_radius_9 = 30
-dot_radius_16 = 30
+background_color = lab_to_rgb((50, 0, 0))
+dot_radius_4 = 60
+dot_radius_9 = 60
+dot_radius_16 = 60
+color_diff = 60 # in degrees
+jitter_offset_4 = 5
+jitter_offset_9 = 5
 
 # Create the dot_arrays folder if it doesn't exist
 os.makedirs("dot_arrays", exist_ok=True)
@@ -36,19 +74,17 @@ for i in range(batch_size):
     # Draw dots for 4 dots
     center_x_4 = image_size // 2
     center_y_4 = image_size // 2
-    dot_color_4 = (
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
+
+    dot_color_4_lab = (
+        50,
+        random.randint(-128, 128),
+        random.randint(-128, 128),
     )
-    special_dot_color_4 = (
-        min(dot_color_4[0] + random.randint(-50, 50), 255),
-        min(dot_color_4[1] + random.randint(-50, 50), 255),
-        min(dot_color_4[2] + random.randint(-50, 50), 255),
-    )
+    special_dot_color_4_lab = new_color(dot_color_4_lab, color_diff)
+    dot_color_4 = lab_to_rgb(dot_color_4_lab)
+    special_dot_color_4 = lab_to_rgb(special_dot_color_4_lab)
     special_dot_index_4 = random.randint(0, 3)
-    distance_4 = (image_size - 2 * dot_radius_4) // 6
-    jitter_offset_4 = dot_radius_4 // 4
+    distance_4 = (image_size - 2 * dot_radius_4) // 4
     dot_coordinates_4 = [
         (
             center_x_4
@@ -99,19 +135,16 @@ for i in range(batch_size):
     # Draw dots for 9 dots
     center_x_9 = image_size // 2
     center_y_9 = image_size // 2
-    dot_color_9 = (
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
+    dot_color_9_lab = (
+        50,
+        random.randint(-128, 128),
+        random.randint(-128, 128),
     )
-    special_dot_color_9 = (
-        min(dot_color_9[0] + random.randint(-50, 50), 255),
-        min(dot_color_9[1] + random.randint(-50, 50), 255),
-        min(dot_color_9[2] + random.randint(-50, 50), 255),
-    )
+    special_dot_color_9_lab = new_color(dot_color_9_lab, color_diff)
+    dot_color_9 = lab_to_rgb(dot_color_9_lab)
+    special_dot_color_9 = lab_to_rgb(special_dot_color_9_lab)
     special_dot_index_9 = random.randint(0, 8)
-    distance_9 = (image_size - 2 * dot_radius_9) // 4
-    jitter_offset_9 = dot_radius_9 // 2
+    distance_9 = (image_size - 2 * dot_radius_9) // 2.5
     dot_coordinates_9 = [
         (
             center_x_9 - distance_9 + random.randint(-jitter_offset_9, jitter_offset_9),
